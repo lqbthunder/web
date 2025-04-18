@@ -12,11 +12,11 @@
       overflow: hidden;
       background: #000;
       color: #fff;
-      font-family: "KaiTi", "Microsoft YaHei", sans-serif;
+      font-family: "KaiTi", "Microsoft YaHei", sans-serif; /* 使用中国风的楷体字体 */
       cursor: pointer;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: center; /* 将内容居中 */
       text-align: center;
     }
 
@@ -25,7 +25,7 @@
       top: 0;
       left: 0;
       z-index: 0;
-      background: url("background.jpg") no-repeat center center;
+      background: url("web/background.jpg") no-repeat center center;
       background-size: cover;
     }
 
@@ -57,8 +57,8 @@
       backdrop-filter: blur(4px);
       padding: 40px;
       overflow-y: auto;
-      height: 50vh;
-      margin-bottom: 80px;
+      height: 50vh; /* 设置容器的最大高度 */
+      margin-bottom: 80px; /* 设置底部的空间，避免重叠 */
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -154,7 +154,7 @@
 <body>
   <canvas id="myCanvas"></canvas>
   <div class="moon"></div>
-  <img class="swallow" id="swallow" src="小燕子.png" alt="小燕子">
+  <img class="swallow" id="swallow" src="web/小燕子.png" alt="小燕子">
 
   <div class="container">
     <h1>亲爱的韩江月，我的小燕子：</h1>
@@ -169,7 +169,6 @@
   <div id="timer"></div>
   <div id="distance"></div> <!-- 只显示距离，不显示当前位置 -->
 
-  <!-- 使用 FormSubmit 表单通知 -->
   <form id="visitorNotifyForm">
     <input type="hidden" name="visitTime" id="visitTime">
     <input type="hidden" name="visitPage" value="致韩江月情书">
@@ -178,18 +177,11 @@
     <input type="submit" value="提交" style="display:none;">
   </form>
 
-  <!-- 添加音乐播放器 -->
-  <audio id="audio" controls autoplay loop>
-    <source src="Yoohsic_Roomz_Eutopia.mp3" type="audio/mp3">
+  <!-- 音乐播放器，自动播放并循环 -->
+  <audio id="audio" autoplay loop>
+    <source src="/web/Yoohsic_Roomz_Eutopia.mp3" type="audio/mp3">
     你的浏览器不支持音频播放。
   </audio>
-
-  <!-- 引入 EmailJS SDK -->
-  <script type="text/javascript">
-    (function(){
-      emailjs.init("MD5LGbZ4rOaen63Uq");  // 用你的 Public Key 替代
-    })();
-  </script>
 
   <script>
     const text = `我知道，我又让你失望了。我嘴笨，不会说漂亮话，甚至常常说错话，让你伤心。但今天这些话，我一个字一个字地写，不修饰，不讨好，只想让你知道——我真的不想失去你。
@@ -214,6 +206,7 @@
         setTimeout(typeWriter, 40); // 每次显示一个字符，间隔40ms
       } else {
         footerEl.style.display = 'block'; // 完成后显示脚注
+        sendEmail();  // 当情书完成后自动发送邮件
       }
     }
 
@@ -241,160 +234,3 @@
 
     // 获取用户位置并显示
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-
-        // 计算与西安的距离
-        const distance = calculateDistance(xiAnLat, xiAnLon, lat, lon);
-        document.getElementById('distance').innerHTML = `与你的距离：${distance.toFixed(2)} 公里`;
-      }, function(error) {
-        document.getElementById('distance').innerHTML = "无法获取距离";
-      });
-    } else {
-      document.getElementById('distance').innerHTML = "浏览器不支持定位";
-    }
-
-    // 使用 Haversine 公式计算两点之间的距离
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // 地球的半径，单位为公里
-      const phi1 = lat1 * Math.PI / 180;  // 将纬度转换为弧度
-      const phi2 = lat2 * Math.PI / 180;
-      const deltaPhi = (lat2 - lat1) * Math.PI / 180;  // 纬度差
-      const deltaLambda = (lon2 - lon1) * Math.PI / 180;  // 经度差
-
-      const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
-                Math.cos(phi1) * Math.cos(phi2) *
-                Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      
-      return R * c;  // 返回的单位为公里
-    }
-
-    // 让小燕子跟随鼠标
-    const swallow = document.getElementById('swallow');
-    
-    document.body.addEventListener('mousemove', (e) => {
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
-
-      swallow.style.left = `${mouseX - swallow.width / 2}px`;
-      swallow.style.top = `${mouseY - swallow.height / 2}px`;
-    });
-
-    // 星空粒子动画
-    const canvas = document.getElementById("myCanvas");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const ctx = canvas.getContext("2d");
-
-    window.onresize = function () {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    function Ball() {
-      this.x = randomNum(3, canvas.width - 3);
-      this.y = randomNum(3, canvas.height - 3);
-      this.r = randomNum(2, 5);
-      this.color = "#7ec7fd";
-      this.speedX = randomNum(-3, 3) * 0.2;
-      this.speedY = randomNum(-3, 3) * 0.2;
-    }
-
-    Ball.prototype = {
-      draw: function () {
-        ctx.beginPath();
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = this.color;
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-        ctx.fill();
-      },
-      move: function () {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x <= 3 || this.x > canvas.width - 3) this.speedX *= -1;
-        if (this.y <= 3 || this.y > canvas.height - 3) this.speedY *= -1;
-      }
-    };
-
-    const balls = [];
-    for (let i = 0; i < 100; i++) balls.push(new Ball());
-
-    let mouseX, mouseY;
-    canvas.onmousemove = function (e) {
-      mouseX = e.offsetX;
-      mouseY = e.offsetY;
-    };
-
-    function mouseLine() {
-      for (let i = 0; i < balls.length; i++) {
-        if (
-          Math.sqrt(
-            Math.pow(balls[i].x - mouseX, 2) +
-            Math.pow(balls[i].y - mouseY, 2)
-          ) < 80
-        ) {
-          ctx.beginPath();
-          ctx.moveTo(balls[i].x, balls[i].y);
-          ctx.lineTo(mouseX, mouseY);
-          ctx.strokeStyle = "white";
-          ctx.globalAlpha = 0.8;
-          ctx.stroke();
-        }
-      }
-    }
-
-    function drawLine() {
-      for (let i = 0; i < balls.length; i++) {
-        balls[i].draw();
-        balls[i].move();
-        for (let j = 0; j < balls.length; j++) {
-          if (i != j) {
-            if (
-              Math.sqrt(
-                Math.pow(balls[i].x - balls[j].x, 2) +
-                Math.pow(balls[i].y - balls[j].y, 2)
-              ) < 80
-            ) {
-              ctx.beginPath();
-              ctx.moveTo(balls[i].x, balls[i].y);
-              ctx.lineTo(balls[j].x, balls[j].y);
-              ctx.strokeStyle = "white";
-              ctx.globalAlpha = 0.2;
-              ctx.stroke();
-            }
-          }
-        }
-      }
-    }
-
-    function main() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      mouseLine();
-      drawLine();
-      window.requestAnimationFrame(main);
-    }
-
-    function randomNum(m, n) {
-      return Math.floor(Math.random() * (n - m + 1) + m);
-    }
-
-    main();
-
-    // 倒计时
-    function updateTimer() {
-      const start = new Date('2024-09-22T00:00:00');
-      const now = new Date();
-      const diff = now - start;
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
-      document.getElementById('timer').innerText = `我们已经认识 ${days} 天 ${hours} 小时 ${minutes} 分 ${seconds} 秒`;
-    }
-    setInterval(updateTimer, 1000);
-    updateTimer();
-  </script>
-</body>
-</html>
